@@ -58,6 +58,27 @@ app.post('/upload', fileUploadMiddleware, (req, res) => {
     }).catch(err => res.status(500).send({message: 'error during files upload', error: err}));
 });
 
+app.get('/uploads/:fileUuid', (req, res) => {
+    res.send(FilesDatabase[req.params.fileUuid]);
+});
+
+app.put('/uploads/:fileUuid', (req, res) => {
+    const reqUserUuid = 7,
+        file = FilesDatabase[req.params.fileUuid],
+        newPrivacy = 'public';
+
+    if(!file) {
+        res.status(404).send({message: 'File does not exist'})
+    }
+
+    if(file.ownerUuid === reqUserUuid) {
+        file.privacy = newPrivacy;
+        res.send(file);
+    } else {
+        res.status(403).send({message: 'Not allowed'});
+    }
+});
+
 app.get('*', (req, res) => {
     res.send({
         message: 'ok'
@@ -67,3 +88,11 @@ app.get('*', (req, res) => {
 app.listen(port, function () {
     console.log(`listening on port ${port}`);
 });
+
+
+const FilesDatabase = {
+    "b0d8cfe0-ea90-11e9-91cd-35b843176917" : {
+        ownerUuid: 7,
+        privacy: 'private'
+    }
+};
